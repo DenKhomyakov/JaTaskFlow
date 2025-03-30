@@ -3,8 +3,10 @@ package com.example.jataskflow.service;
 import com.example.jataskflow.dto.response.TokensResponse;
 import com.example.jataskflow.dto.request.LoginRequest;
 import com.example.jataskflow.dto.request.RefreshTokenRequest;
+import com.example.jataskflow.exception.InvalidTokenException;
 import com.example.jataskflow.security.JwtTokenUtils;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -53,8 +55,10 @@ public class AuthenticationService {
                     jwtUtils.generateAccessToken(userDetails),
                     jwtUtils.generateRefreshToken(userDetails)
             );
+        } catch (ExpiredJwtException e) {
+            throw new InvalidTokenException("Refresh token expired");
         } catch (Exception e) {
-            throw new RuntimeException("Invalid refresh token", e);
+            throw new InvalidTokenException("Invalid refresh token");
         }
     }
 }
