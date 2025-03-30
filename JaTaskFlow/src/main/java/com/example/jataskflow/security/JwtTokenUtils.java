@@ -45,4 +45,11 @@ public class JwtTokenUtils {
                 .signWith(SignatureAlgorithm.HS256, refreshSecret)
                 .compact();
     }
+
+    public Claims parseRefreshToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(refreshSecret)
+                .parseClaimsJws(token)
+                .getBody();
+    }
 }

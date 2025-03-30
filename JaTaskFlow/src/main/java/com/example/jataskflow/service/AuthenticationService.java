@@ -4,6 +4,7 @@ import com.example.jataskflow.dto.response.TokensResponse;
 import com.example.jataskflow.dto.request.LoginRequest;
 import com.example.jataskflow.dto.request.RefreshTokenRequest;
 import com.example.jataskflow.security.JwtTokenUtils;
+import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -43,7 +44,17 @@ public class AuthenticationService {
     }
 
     public TokensResponse refreshTokens(RefreshTokenRequest request) {
-        // Временная заглушка (не забыть реализовать позже!)
-        throw new UnsupportedOperationException("Refresh token functionality not implemented yet");
+        try {
+            Claims claims = jwtUtils.parseRefreshToken(request.refreshToken());
+            String email = claims.getSubject();
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+            return new TokensResponse(
+                    jwtUtils.generateAccessToken(userDetails),
+                    jwtUtils.generateRefreshToken(userDetails)
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid refresh token", e);
+        }
     }
 }
