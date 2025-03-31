@@ -10,6 +10,11 @@ CREATE TABLE IF NOT EXISTS users (
 INSERT INTO users (firstname, lastname, email, password, role)
 VALUES ('Admin', 'Adminov', 'admin@mail.com', '$2a$10$Xl0yhvzLIaJCDdKBS0Lld.ksK7c2Zytg/ZKFdtIYYQUv8rUfvCR4W', 'ADMIN');
 
-
 INSERT INTO users (firstname, lastname, email, password, role)
 VALUES ('User', 'Userov', 'user@mail.com', '$2a$10$Xl0yhvzLIaJCDdKBS0Lld.ksK7c2Zytg/ZKFdtIYYQUv8rUfvCR4W', 'USER');
+
+INSERT INTO tasks (title, description, status, priority, author_id)
+VALUES ('Разработать API', 'Создать REST API для системы задач', 'WAITING', 'HIGH', 1);
+
+INSERT INTO tasks (title, description, status, priority, author_id)
+VALUES ('Написать тесты', 'Покрыть код unit-тестами', 'WAITING', 'MEDIUM', 2);
