@@ -30,3 +30,9 @@ VALUES ('Разработать API', 'Создать REST API для систе
 
 INSERT INTO tasks (title, description, status, priority, author_id)
 VALUES ('Написать тесты', 'Покрыть код unit-тестами', 'WAITING', 'MEDIUM', 2);
+
+INSERT INTO comments (text, author_id, task_id, created_at)
+VALUES ('Нужно использовать Spring Boot 3', 1, 1, CURRENT_TIMESTAMP);
+
+INSERT INTO comments (text, author_id, task_id, created_at)
+VALUES ('Добавить валидацию DTO', 2, 1, CURRENT_TIMESTAMP);
