@@ -7,6 +7,18 @@ CREATE TABLE IF NOT EXISTS users (
     role VARCHAR(20) NOT NULL
     );
 
+CREATE TABLE IF NOT EXISTS tasks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    status VARCHAR(20) NOT NULL,
+    priority VARCHAR(20) NOT NULL,
+    author_id INT,
+    executor_id INT,
+    FOREIGN KEY (author_id) REFERENCES users(id),
+    FOREIGN KEY (executor_id) REFERENCES users(id)
+    );
+
 INSERT INTO users (firstname, lastname, email, password, role)
 VALUES ('Admin', 'Adminov', 'admin@mail.com', '$2a$10$Xl0yhvzLIaJCDdKBS0Lld.ksK7c2Zytg/ZKFdtIYYQUv8rUfvCR4W', 'ADMIN');
 
