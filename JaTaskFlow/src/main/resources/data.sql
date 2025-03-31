@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     firstname VARCHAR(255) NOT NULL,
     lastname VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -8,22 +8,22 @@ CREATE TABLE IF NOT EXISTS users (
     );
 
 CREATE TABLE IF NOT EXISTS tasks (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     status VARCHAR(20) NOT NULL,
     priority VARCHAR(20) NOT NULL,
-    author_id INT,
-    executor_id INT,
+    author_id BIGINT,
+    executor_id BIGINT,
     FOREIGN KEY (author_id) REFERENCES users(id),
     FOREIGN KEY (executor_id) REFERENCES users(id)
     );
 
 CREATE TABLE IF NOT EXISTS comments (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     text TEXT NOT NULL,
-    author_id INT NOT NULL,
-    task_id INT NOT NULL,
+    author_id BIGINT NOT NULL,
+    task_id BIGINT NOT NULL,
     created_at TIMESTAMP,
     FOREIGN KEY (author_id) REFERENCES users(id),
     FOREIGN KEY (task_id) REFERENCES tasks(id)
