@@ -61,6 +61,7 @@ public class Task {
     public void setStatus(Status status) {
         this.status = status;
     }
+
     public Priority getPriority() {
         return this.priority;
     }
@@ -83,5 +84,13 @@ public class Task {
 
     public void setExecutor(User executor) {
         this.executor = executor;
+    }
+
+    public List<Comment> getComments() {
+        return this.comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 }
