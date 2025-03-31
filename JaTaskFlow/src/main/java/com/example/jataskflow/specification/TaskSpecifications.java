@@ -8,7 +8,6 @@ import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Join;
 
 public class TaskSpecifications {
-
     public static Specification<Task> hasStatus(Status status) {
         return (root, query, cb) -> status == null ? null : cb.equal(root.get("status"), status);
     }
