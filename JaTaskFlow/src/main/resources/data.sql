@@ -19,6 +19,16 @@ CREATE TABLE IF NOT EXISTS tasks (
     FOREIGN KEY (executor_id) REFERENCES users(id)
     );
 
+CREATE TABLE IF NOT EXISTS comments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    text TEXT NOT NULL,
+    author_id INT NOT NULL,
+    task_id INT NOT NULL,
+    created_at TIMESTAMP,
+    FOREIGN KEY (author_id) REFERENCES users(id),
+    FOREIGN KEY (task_id) REFERENCES tasks(id)
+    );
+
 INSERT INTO users (firstname, lastname, email, password, role)
 VALUES ('Admin', 'Adminov', 'admin@mail.com', '$2a$10$Xl0yhvzLIaJCDdKBS0Lld.ksK7c2Zytg/ZKFdtIYYQUv8rUfvCR4W', 'ADMIN');
 
