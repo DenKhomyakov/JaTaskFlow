@@ -6,14 +6,22 @@ import com.example.jataskflow.model.Status;
 import java.util.List;
 
 public class TaskDto {
+    private Long id;
     private String title;
     private String description;
     private Status status;
     private Priority priority;
     private Long authorId;
     private Long executorId;
-
     private List<CommentDto> comments;
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getTitle() {
         return this.title;
