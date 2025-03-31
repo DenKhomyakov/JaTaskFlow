@@ -3,6 +3,8 @@ package com.example.jataskflow.dto;
 import com.example.jataskflow.model.Priority;
 import com.example.jataskflow.model.Status;
 
+import java.util.List;
+
 public class TaskDto {
     private String title;
     private String description;
@@ -10,6 +12,8 @@ public class TaskDto {
     private Priority priority;
     private Long authorId;
     private Long executorId;
+
+    private List<CommentDto> comments;
 
     public String getTitle() {
         return this.title;
@@ -57,5 +61,13 @@ public class TaskDto {
 
     public void setExecutorId(Long executorId) {
         this.executorId = executorId;
+    }
+
+    public List<CommentDto> getComments() {
+        return this.comments;
+    }
+
+    public void setComments(List<CommentDto> comments) {
+        this.comments = comments;
     }
 }
