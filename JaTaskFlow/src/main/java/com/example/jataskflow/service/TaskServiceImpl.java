@@ -2,6 +2,8 @@ package com.example.jataskflow.service;
 
 import com.example.jataskflow.dto.CommentDto;
 import com.example.jataskflow.dto.TaskDto;
+import com.example.jataskflow.dto.response.CommentResponse;
+import com.example.jataskflow.dto.response.TaskResponse;
 import com.example.jataskflow.exception.TaskNotFoundException;
 import com.example.jataskflow.model.Comment;
 import com.example.jataskflow.model.Priority;
@@ -65,33 +67,48 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskDto getTaskWithComments(Long taskId) {
+    public TaskResponse getTaskWithComments(Long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException(taskId));
 
-        TaskDto taskDto = new TaskDto();
-        taskDto.setId(task.getId());
-        taskDto.setTitle(task.getTitle());
-        taskDto.setDescription(task.getDescription());
-        taskDto.setStatus(task.getStatus());
-        taskDto.setPriority(task.getPriority());
+        TaskResponse response = new TaskResponse();
+        response.setId(task.getId());
+        response.setTitle(task.getTitle());
+        response.setDescription(task.getDescription());
+        response.setStatus(task.getStatus());
+        response.setPriority(task.getPriority());
 
+        // Добавляем информацию об авторе
         if (task.getAuthor() != null) {
-            taskDto.setAuthorId(task.getAuthor().getId());
+            response.setAuthorId(task.getAuthor().getId());
+            response.setAuthorName(task.getAuthor().getFirstname() + " " + task.getAuthor().getLastname());
         }
 
+        // Добавляем информацию об исполнителе
         if (task.getExecutor() != null) {
-            taskDto.setExecutorId(task.getExecutor().getId());
+            response.setExecutorId(task.getExecutor().getId());
+            response.setExecutorName(task.getExecutor().getFirstname() + " " + task.getExecutor().getLastname());
         }
 
+        // Добавляем комментарии
         if (task.getComments() != null) {
-            List<CommentDto> commentDtos = task.getComments().stream()
-                    .map(this::convertToCommentDto)
+            List<CommentResponse> commentResponses = task.getComments().stream()
+                    .map(comment -> {
+                        CommentResponse cr = new CommentResponse();
+                        cr.setId(comment.getId());
+                        cr.setText(comment.getText());
+                        cr.setCreatedAt(comment.getCreatedAt());
+                        if (comment.getAuthor() != null) {
+                            cr.setAuthorId(comment.getAuthor().getId());
+                            cr.setAuthorName(comment.getAuthor().getFirstname() + " " + comment.getAuthor().getLastname());
+                        }
+                        return cr;
+                    })
                     .collect(Collectors.toList());
-            taskDto.setComments(commentDtos);
+            response.setComments(commentResponses);
         }
 
-        return taskDto;
+        return response;
     }
 
     @Override
@@ -117,5 +134,23 @@ public class TaskServiceImpl implements TaskService {
 
         dto.setCreatedAt(comment.getCreatedAt());
         return dto;
+    }
+
+    private CommentResponse convertToCommentResponse(Comment comment) {
+        CommentResponse response = new CommentResponse();
+        response.setId(comment.getId());
+        response.setText(comment.getText());
+        response.setCreatedAt(comment.getCreatedAt());
+
+        if (comment.getAuthor() != null) {
+            response.setAuthorId(comment.getAuthor().getId());
+            response.setAuthorName(comment.getAuthor().getFirstname() + " " + comment.getAuthor().getLastname());
+        }
+
+        if (comment.getTask() != null) {
+            response.setTaskId(comment.getTask().getId());
+        }
+
+        return response;
     }
 }

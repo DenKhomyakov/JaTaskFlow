@@ -1,12 +1,14 @@
 package com.example.jataskflow.controller;
 
 import com.example.jataskflow.dto.TaskDto;
+import com.example.jataskflow.dto.response.TaskResponse;
 import com.example.jataskflow.model.Priority;
 import com.example.jataskflow.model.Status;
 import com.example.jataskflow.model.Task;
 import com.example.jataskflow.service.TaskServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 
@@ -43,5 +45,10 @@ public class TaskController {
 
         Pageable pageable = PageRequest.of(page, size);
         return taskService.getTasksWithFilters(status, priority, authorId, executorId, pageable);
+    }
+
+    @GetMapping("/{taskId}")
+    public ResponseEntity<TaskResponse> getTaskWithComments(@PathVariable Long taskId) {
+        return ResponseEntity.ok(taskService.getTaskWithComments(taskId));
     }
 }

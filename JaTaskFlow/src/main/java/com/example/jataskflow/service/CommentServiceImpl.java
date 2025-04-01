@@ -1,5 +1,6 @@
 package com.example.jataskflow.service;
 
+import com.example.jataskflow.dto.CommentDto;
 import com.example.jataskflow.dto.request.CommentRequest;
 import com.example.jataskflow.dto.response.CommentResponse;
 import com.example.jataskflow.exception.NotFoundException;
@@ -28,6 +29,23 @@ public class CommentServiceImpl implements CommentService {
         this.commentRepository = commentRepository;
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
+    }
+
+    @Override
+    public Comment addComment(CommentDto commentDto) {
+        Task task = taskRepository.findById(commentDto.getTaskId())
+                .orElseThrow(() -> new NotFoundException("Task not found"));
+
+        User author = userRepository.findById(commentDto.getAuthorId())
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        Comment comment = new Comment();
+        comment.setText(commentDto.getText());
+        comment.setTask(task);
+        comment.setAuthor(author);
+        comment.setCreatedAt(LocalDateTime.now());
+
+        return commentRepository.save(comment);
     }
 
     @Override
