@@ -11,7 +11,9 @@ public class TaskResponse {
     private Status status;
     private Priority priority;
     private Long authorId;
+    private String authorName;
     private Long executorId;
+    private String executorName;
     private List<CommentResponse> comments;
 
     public Long getId() { return this.id; }
@@ -38,9 +40,17 @@ public class TaskResponse {
 
     public void setAuthorId(Long authorId) { this.authorId = authorId; }
 
+    public String getAuthorName() { return this.authorName; }
+
+    public void setAuthorName(String authorName) { this.authorName = authorName; }
+
     public Long getExecutorId() { return this.executorId; }
 
     public void setExecutorId(Long executorId) { this.executorId = executorId; }
+
+    public String getExecutorName() { return this.executorName; }
+
+    public void setExecutorName(String executorName) { this.executorName = executorName; }
 
     public List<CommentResponse> getComments() { return this.comments; }
 
