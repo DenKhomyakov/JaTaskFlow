@@ -4,11 +4,11 @@ import com.example.jataskflow.dto.CommentDto;
 import com.example.jataskflow.dto.TaskDto;
 import com.example.jataskflow.dto.response.CommentResponse;
 import com.example.jataskflow.dto.response.TaskResponse;
+import com.example.jataskflow.exception.AccessDeniedException;
+import com.example.jataskflow.exception.NotFoundException;
 import com.example.jataskflow.exception.TaskNotFoundException;
-import com.example.jataskflow.model.Comment;
-import com.example.jataskflow.model.Priority;
-import com.example.jataskflow.model.Status;
-import com.example.jataskflow.model.Task;
+import com.example.jataskflow.model.*;
+import com.example.jataskflow.repository.UserRepository;
 import com.example.jataskflow.repository.TaskRepository;
 import com.example.jataskflow.specification.TaskSpecifications;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +22,13 @@ import java.util.stream.Collectors;
 @Service
 public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
+
 
     @Autowired
-    public TaskServiceImpl(TaskRepository taskRepository) {
+    public TaskServiceImpl(TaskRepository taskRepository, UserRepository userRepository) {
         this.taskRepository = taskRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -112,9 +115,24 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task updateTaskStatus(Long taskId, Status newStatus) {
+    public Task updateTaskStatus(Long taskId, Status newStatus, Long currentUserId) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new TaskNotFoundException(taskId));
+                .orElseThrow(() -> new NotFoundException("Task not found"));
+
+        User currentUser = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        boolean isAuthor = task.getAuthor().getId().equals(currentUserId);
+        boolean isExecutor = task.getExecutor() != null &&
+                task.getExecutor().getId().equals(currentUserId);
+        boolean isAdmin = currentUser.getRole() == Role.ADMIN;
+
+        if (!isAuthor && !isExecutor && !isAdmin) {
+            throw new AccessDeniedException(
+                    "Only author, executor or admin can change task status"
+            );
+        }
+
         task.setStatus(newStatus);
         return taskRepository.save(task);
     }

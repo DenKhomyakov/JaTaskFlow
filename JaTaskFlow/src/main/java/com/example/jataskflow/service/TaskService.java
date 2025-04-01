@@ -14,5 +14,5 @@ public interface TaskService {
     List<Task> getAllTasks();
     List<Task> getTasksWithFilters(Status status, Priority priority, Long authorId, Long executorId, Pageable pageable);
     TaskResponse getTaskWithComments(Long taskId);
-    Task updateTaskStatus(Long taskId, Status newStatus);
+    Task updateTaskStatus(Long taskId, Status newStatus, Long currentUserId);
 }
