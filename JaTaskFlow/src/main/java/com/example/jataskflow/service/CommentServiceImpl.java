@@ -120,13 +120,18 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException("Comment not found"));
 
-        // Проверка прав (автор или ADMIN)
         User currentUser = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        if (!comment.getAuthor().getId().equals(currentUserId)
-                && !currentUser.getRole().equals(Role.ADMIN)) {
-            throw new AccessDeniedException("No permission to delete this comment");
+        // Проверка: автор или ADMIN
+        boolean isAuthor = comment.getAuthor().getId().equals(currentUserId);
+        boolean isAdmin = currentUser.getRole() == Role.ADMIN;
+
+        if (!isAuthor && !isAdmin) {
+            throw new AccessDeniedException(
+                    "У вас нет прав на удаление этого комментария. " +
+                            "Только автор или администратор могут удалять комментарии."
+            );
         }
 
         commentRepository.delete(comment);

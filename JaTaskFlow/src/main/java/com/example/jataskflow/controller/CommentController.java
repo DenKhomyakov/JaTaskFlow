@@ -3,6 +3,7 @@ package com.example.jataskflow.controller;
 import com.example.jataskflow.dto.CommentDto;
 import com.example.jataskflow.dto.response.CommentResponse;
 import com.example.jataskflow.model.Comment;
+import com.example.jataskflow.model.User;
 import com.example.jataskflow.service.CommentServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Sort;
@@ -45,7 +46,8 @@ public class CommentController {
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = Long.parseLong(userDetails.getUsername());
+
+        Long userId = ((User) userDetails).getId();
         commentService.deleteComment(id, userId);
         return ResponseEntity.noContent().build();
     }
