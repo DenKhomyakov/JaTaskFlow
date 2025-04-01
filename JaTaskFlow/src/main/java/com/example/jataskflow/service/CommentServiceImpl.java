@@ -5,6 +5,7 @@ import com.example.jataskflow.dto.request.CommentRequest;
 import com.example.jataskflow.dto.response.CommentResponse;
 import com.example.jataskflow.exception.NotFoundException;
 import com.example.jataskflow.model.Comment;
+import com.example.jataskflow.model.Role;
 import com.example.jataskflow.model.Task;
 import com.example.jataskflow.model.User;
 import com.example.jataskflow.repository.CommentRepository;
@@ -110,6 +111,24 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteComment(Long id) {
         commentRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteComment(Long commentId, Long currentUserId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("Comment not found"));
+
+        // Проверка прав (автор или ADMIN)
+        User currentUser = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        if (!comment.getAuthor().getId().equals(currentUserId)
+                && !currentUser.getRole().equals(Role.ADMIN)) {
+            throw new AccessDeniedException("No permission to delete this comment");
+        }
+
+        commentRepository.delete(comment);
     }
 
     private CommentResponse convertToResponse(Comment comment) {

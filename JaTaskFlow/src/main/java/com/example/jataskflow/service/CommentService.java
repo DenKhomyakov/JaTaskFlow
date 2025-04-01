@@ -16,4 +16,5 @@ public interface CommentService {
     CommentResponse getCommentById(Long id);
     void deleteComment(Long id);
     Page<CommentResponse> getCommentsByTaskId(Long taskId, Pageable pageable);
+    void deleteComment(Long commentId, Long currentUserId);
 }
