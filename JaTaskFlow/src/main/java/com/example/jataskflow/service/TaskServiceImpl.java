@@ -2,6 +2,7 @@ package com.example.jataskflow.service;
 
 import com.example.jataskflow.dto.CommentDto;
 import com.example.jataskflow.dto.TaskDto;
+import com.example.jataskflow.exception.TaskNotFoundException;
 import com.example.jataskflow.model.Comment;
 import com.example.jataskflow.model.Priority;
 import com.example.jataskflow.model.Status;
@@ -66,7 +67,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskDto getTaskWithComments(Long taskId) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+                .orElseThrow(() -> new TaskNotFoundException(taskId));
 
         TaskDto taskDto = new TaskDto();
         taskDto.setId(task.getId());
@@ -96,7 +97,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task updateTaskStatus(Long taskId, Status newStatus) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+                .orElseThrow(() -> new TaskNotFoundException(taskId));
         task.setStatus(newStatus);
         return taskRepository.save(task);
     }
