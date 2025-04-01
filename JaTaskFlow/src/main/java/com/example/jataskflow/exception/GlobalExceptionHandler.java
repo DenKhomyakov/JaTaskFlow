@@ -10,17 +10,17 @@ import java.nio.file.AccessDeniedException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler(TaskNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFound(NotFoundException ex) {
-        return new ErrorResponse("Not Found", ex.getMessage());
+    public ErrorResponse handleTaskNotFound(TaskNotFoundException ex) {
+        return new ErrorResponse("task_not_found", ex.getMessage());
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleAccessDenied(AccessDeniedException ex) {
-        return new ErrorResponse("Access Denied", ex.getMessage());
+    @ExceptionHandler(CommentNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleCommentNotFound(CommentNotFoundException ex) {
+        return new ErrorResponse("comment_not_found", ex.getMessage());
     }
 
-    public record ErrorResponse(String error, String message) {}
+    public record ErrorResponse(String code, String message) {}
 }
