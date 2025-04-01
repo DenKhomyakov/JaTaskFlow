@@ -12,6 +12,8 @@ import com.example.jataskflow.repository.TaskRepository;
 import com.example.jataskflow.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -68,10 +70,34 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<CommentResponse> getCommentsByTaskId(Long taskId) {
-        return commentRepository.findByTaskId(taskId).stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
+    public Page<CommentResponse> getCommentsByTaskId(Long taskId, Pageable pageable) {
+        // Проверка существования задачи
+        if (!taskRepository.existsById(taskId)) {
+            throw new NotFoundException("Task not found with id: " + taskId);
+        }
+
+        // Получаем страницу комментариев
+        Page<Comment> commentsPage = commentRepository.findByTaskId(taskId, pageable);
+
+        // Преобразуем в DTO
+        return commentsPage.map(comment -> {
+            CommentResponse response = new CommentResponse();
+            response.setId(comment.getId());
+            response.setText(comment.getText());
+            response.setCreatedAt(comment.getCreatedAt());
+
+            if (comment.getAuthor() != null) {
+                response.setAuthorId(comment.getAuthor().getId());
+                response.setAuthorName(
+                        comment.getAuthor().getFirstname() + " " +
+                                comment.getAuthor().getLastname()
+                );
+            }
+
+            response.setTaskId(comment.getTask().getId());
+
+            return response;
+        });
     }
 
     @Override
