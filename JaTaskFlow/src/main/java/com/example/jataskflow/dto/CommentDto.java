@@ -12,7 +12,6 @@ public class CommentDto {
     public Long getId() {
         return this.id;
     }
-
     public void setId(Long id) {
         this.id = id;
     }
@@ -20,7 +19,6 @@ public class CommentDto {
     public String getText() {
         return this.text;
     }
-
     public void setText(String text) {
         this.text = text;
     }
@@ -28,7 +26,6 @@ public class CommentDto {
     public Long getAuthorId() {
         return this.authorId;
     }
-
     public void setAuthorId(Long authorId) {
         this.authorId = authorId;
     }
@@ -36,7 +33,6 @@ public class CommentDto {
     public Long getTaskId() {
         return this.taskId;
     }
-
     public void setTaskId(Long taskId) {
         this.taskId = taskId;
     }
@@ -44,7 +40,6 @@ public class CommentDto {
     public LocalDateTime getCreatedAt() {
         return this.createdAt;
     }
-
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }

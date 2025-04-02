@@ -30,67 +30,27 @@ public class Task {
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     private List<Comment> comments;
 
-    public Long getId() {
-        return this.id;
-    }
+    public Long getId() { return this.id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getTitle() { return this.title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public String getTitle() {
-        return this.title;
-    }
+    public String getDescription() { return this.description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public Status getStatus() { return this.status; }
+    public void setStatus(Status status) { this.status = status; }
 
-    public String getDescription() {
-        return this.description;
-    }
+    public Priority getPriority() { return this.priority; }
+    public void setPriority(Priority priority) { this.priority = priority; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public User getAuthor() { return this.author; }
+    public void setAuthor(User author) { this.author = author; }
 
-    public Status getStatus() {
-        return this.status;
-    }
+    public User getExecutor() { return this.executor; }
+    public void setExecutor(User executor) { this.executor = executor; }
 
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public Priority getPriority() {
-        return this.priority;
-    }
-
-    public void setPriority(Priority priority) {
-        this.priority = priority;
-    }
-
-    public User getAuthor() {
-        return this.author;
-    }
-
-    public void setAuthor(User author) {
-        this.author = author;
-    }
-
-    public User getExecutor() {
-        return this.executor;
-    }
-
-    public void setExecutor(User executor) {
-        this.executor = executor;
-    }
-
-    public List<Comment> getComments() {
-        return this.comments;
-    }
-
-    public void setComments(List<Comment> comments) {
-        this.comments = comments;
-    }
+    public List<Comment> getComments() { return this.comments; }
+    public void setComments(List<Comment> comments) { this.comments = comments; }
 }
