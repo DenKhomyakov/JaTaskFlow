@@ -24,20 +24,17 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Разрешаем H2 Console
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
-                        // Разрешаем Swagger UI
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-resources/**").permitAll()
                         .requestMatchers("/webjars/**").permitAll()
-                        // Разрешаем аутентификацию
+                        .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/auth/**").permitAll()
-                        // Все остальные запросы требуют аутентификации
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers
-                        .frameOptions(frame -> frame.disable()) // Для H2 Console
+                        .frameOptions(frame -> frame.disable())
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
