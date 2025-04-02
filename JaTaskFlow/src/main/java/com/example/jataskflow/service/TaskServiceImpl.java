@@ -11,8 +11,10 @@ import com.example.jataskflow.model.*;
 import com.example.jataskflow.repository.UserRepository;
 import com.example.jataskflow.repository.TaskRepository;
 import com.example.jataskflow.specification.TaskSpecifications;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 
@@ -135,6 +137,22 @@ public class TaskServiceImpl implements TaskService {
 
         task.setStatus(newStatus);
         return taskRepository.save(task);
+    }
+
+    public boolean isAuthor(Long taskId, UserDetails userDetails) {
+        User currentUser = (User) userDetails;
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new NotFoundException("Task not found"));
+        return task.getAuthor().getId().equals(currentUser.getId());
+    }
+
+    @Override
+    @Transactional
+    public void deleteTask(Long taskId) {
+        if (!taskRepository.existsById(taskId)) {
+            throw new NotFoundException("Task not found");
+        }
+        taskRepository.deleteById(taskId);
     }
 
     private CommentDto convertToCommentDto(Comment comment) {
