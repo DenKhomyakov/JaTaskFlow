@@ -5,6 +5,13 @@ import com.example.jataskflow.dto.response.CommentResponse;
 import com.example.jataskflow.model.Comment;
 import com.example.jataskflow.model.User;
 import com.example.jataskflow.service.CommentServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/api/comments")
+@Tag(name = "Комментарии", description = "API для управления комментариями")
 public class CommentController {
     private final CommentServiceImpl commentService;
 
@@ -26,6 +34,15 @@ public class CommentController {
     }
 
     @PostMapping
+    @Operation(
+            summary = "Добавить комментарий",
+            description = "Доступно только аутентифицированным пользователям",
+            security = @SecurityRequirement(name = "JWT"),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Комментарий добавлен"),
+                    @ApiResponse(responseCode = "401", description = "Требуется аутентификация")
+            }
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Comment> addComment(@Valid @RequestBody CommentDto commentDto) {
         Comment comment = commentService.addComment(commentDto);
@@ -33,6 +50,20 @@ public class CommentController {
     }
 
     @GetMapping
+    @Operation(
+            summary = "Получить комментарии к задаче",
+            description = "Возвращает список комментариев с пагинацией",
+            parameters = {
+                    @Parameter(name = "taskId", description = "ID задачи", required = true, example = "1"),
+                    @Parameter(name = "page", description = "Номер страницы", example = "0"),
+                    @Parameter(name = "size", description = "Размер страницы", example = "10")
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Успешный запрос",
+                            content = @Content(schema = @Schema(implementation = Page.class))),
+                    @ApiResponse(responseCode = "404", description = "Задача не найдена")
+            }
+    )
     public ResponseEntity<Page<CommentResponse>> getComments(
             @RequestParam Long taskId,
             @RequestParam(defaultValue = "0") int page,
@@ -42,6 +73,20 @@ public class CommentController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(
+            summary = "Удалить комментарий",
+            description = "Доступно только автору комментария или администратору",
+            security = @SecurityRequirement(name = "JWT"),
+            parameters = {
+                    @Parameter(name = "id", description = "ID комментария", required = true, example = "1")
+            },
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Комментарий удален"),
+                    @ApiResponse(responseCode = "401", description = "Требуется аутентификация"),
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+                    @ApiResponse(responseCode = "404", description = "Комментарий не найден")
+            }
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long id,

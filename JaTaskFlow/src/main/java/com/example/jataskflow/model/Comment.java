@@ -1,15 +1,19 @@
 package com.example.jataskflow.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+@Schema(description = "Сущность комментария")
 @Entity
 @Table(name = "comments")
 public class Comment {
+    @Schema(description = "ID комментария", example = "1")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Schema(description = "Текст комментария", example = "Это тестовый комментарий")
     private String text;
 
     @ManyToOne

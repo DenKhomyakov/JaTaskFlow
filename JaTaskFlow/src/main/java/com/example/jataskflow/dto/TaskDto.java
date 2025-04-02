@@ -2,17 +2,34 @@ package com.example.jataskflow.dto;
 
 import com.example.jataskflow.model.Priority;
 import com.example.jataskflow.model.Status;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
+@Schema(description = "Data Transfer Object для задачи")
 public class TaskDto {
+    @Schema(description = "ID задачи", example = "1")
     private Long id;
+
+    @Schema(description = "Название задачи", required = true, example = "Разработать API", minLength = 3, maxLength = 100)
     private String title;
+
+    @Schema(description = "Подробное описание задачи", example = "Создать REST API для системы", maxLength = 500)
     private String description;
+
+    @Schema(description = "Текущий статус задачи", implementation = Status.class, example = "WAITING")
     private Status status;
+
+    @Schema(description = "Приоритет задачи", implementation = Priority.class, example = "HIGH")
     private Priority priority;
+
+    @Schema(description = "ID автора задачи", example = "1")
     private Long authorId;
+
+    @Schema(description = "ID исполнителя задачи", example = "2")
     private Long executorId;
+
+    @Schema(description = "Список комментариев к задаче")
     private List<CommentDto> comments;
 
     public Long getId() { return this.id; }

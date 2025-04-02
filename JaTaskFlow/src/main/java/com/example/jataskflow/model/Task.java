@@ -1,16 +1,21 @@
 package com.example.jataskflow.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.util.List;
 
+@Schema(description = "Сущность задачи")
 @Entity
 @Table(name = "tasks")
 public class Task {
+    @Schema(description = "ID задачи", example = "1")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Schema(description = "Название задачи", example = "Разработать API")
     private String title;
+
     private String description;
 
     @Enumerated(EnumType.STRING)
