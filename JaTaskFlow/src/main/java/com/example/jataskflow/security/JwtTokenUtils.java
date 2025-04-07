@@ -28,16 +28,14 @@ public class JwtTokenUtils {
     private Long refreshExpiration;
 
     public String generateAccessToken(UserDetails userDetails) {
-        Key key = Keys.hmacShaKeyFor(accessSecret.getBytes());
-
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
-                .claim("roles", userDetails.getAuthorities().stream()
+                .claim("authorities", userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toList()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessExpiration))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .signWith(Keys.hmacShaKeyFor(accessSecret.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }
 
