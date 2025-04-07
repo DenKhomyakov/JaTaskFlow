@@ -7,6 +7,8 @@ import com.example.jataskflow.exception.InvalidTokenException;
 import com.example.jataskflow.security.JwtTokenUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthenticationService {
-
     private final AuthenticationManager authManager;
     private final JwtTokenUtils jwtUtils;
     private final UserDetailsService userDetailsService;
@@ -57,8 +58,10 @@ public class AuthenticationService {
             );
         } catch (ExpiredJwtException e) {
             throw new InvalidTokenException("Refresh token expired");
-        } catch (Exception e) {
+        } catch (SignatureException | MalformedJwtException e) {
             throw new InvalidTokenException("Invalid refresh token");
+        } catch (Exception e) {
+            throw new InvalidTokenException("Authentication failed");
         }
     }
 }
