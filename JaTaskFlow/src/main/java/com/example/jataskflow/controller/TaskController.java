@@ -1,11 +1,9 @@
 package com.example.jataskflow.controller;
 
 import com.example.jataskflow.dto.TaskDto;
+import com.example.jataskflow.dto.response.CommentResponse;
 import com.example.jataskflow.dto.response.TaskResponse;
-import com.example.jataskflow.model.Priority;
-import com.example.jataskflow.model.Status;
-import com.example.jataskflow.model.Task;
-import com.example.jataskflow.model.User;
+import com.example.jataskflow.model.*;
 import com.example.jataskflow.service.TaskServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -67,8 +66,12 @@ public class TaskController {
                     @ApiResponse(responseCode = "200", description = "Успешный запрос")
             }
     )
-    public List<Task> getAllTasks() {
-        return taskService.getAllTasks();
+    public ResponseEntity<List<TaskResponse>> getAllTasks() {
+        List<Task> tasks = taskService.getAllTasks();
+        List<TaskResponse> response = tasks.stream()
+                .map(this::convertToTaskResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/filter")
@@ -125,5 +128,59 @@ public class TaskController {
 
         taskService.deleteTask(taskId);
         return ResponseEntity.noContent().build();
+    }
+
+    private TaskResponse convertToTaskResponse(Task task) {
+        TaskResponse response = new TaskResponse();
+        response.setId(task.getId());
+        response.setTitle(task.getTitle());
+        response.setDescription(task.getDescription());
+        response.setStatus(task.getStatus());
+        response.setPriority(task.getPriority());
+
+        // Информация об авторе
+        if (task.getAuthor() != null) {
+            response.setAuthorId(task.getAuthor().getId());
+            response.setAuthorName(
+                    task.getAuthor().getFirstname() + " " +
+                            task.getAuthor().getLastname()
+            );
+        }
+
+        // Информация об исполнителе
+        if (task.getExecutor() != null) {
+            response.setExecutorId(task.getExecutor().getId());
+            response.setExecutorName(
+                    task.getExecutor().getFirstname() + " " +
+                            task.getExecutor().getLastname()
+            );
+        }
+
+        // Комментарии преобразуем в CommentResponse
+        if (task.getComments() != null) {
+            List<CommentResponse> commentResponses = task.getComments().stream()
+                    .map(this::convertToCommentResponse)
+                    .collect(Collectors.toList());
+            response.setComments(commentResponses);
+        }
+
+        return response;
+    }
+
+    private CommentResponse convertToCommentResponse(Comment comment) {
+        CommentResponse response = new CommentResponse();
+        response.setId(comment.getId());
+        response.setText(comment.getText());
+        response.setCreatedAt(comment.getCreatedAt());
+
+        if (comment.getAuthor() != null) {
+            response.setAuthorId(comment.getAuthor().getId());
+            response.setAuthorName(
+                    comment.getAuthor().getFirstname() + " " +
+                            comment.getAuthor().getLastname()
+            );
+        }
+
+        return response;
     }
 }
