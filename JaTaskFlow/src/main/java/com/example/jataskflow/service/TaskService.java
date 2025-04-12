@@ -19,4 +19,5 @@ public interface TaskService {
     Task updateTaskStatus(Long taskId, Status newStatus, Long currentUserId);
     void deleteTask(Long taskId);
     boolean isAuthor(Long taskId, UserDetails userDetails);
+    TaskResponse setExecutor(Long taskId, Long executorId, UserDetails currentUser);
 }

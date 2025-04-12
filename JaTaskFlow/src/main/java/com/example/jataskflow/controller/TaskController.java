@@ -1,6 +1,7 @@
 package com.example.jataskflow.controller;
 
 import com.example.jataskflow.dto.TaskDto;
+import com.example.jataskflow.dto.request.TaskRequest;
 import com.example.jataskflow.dto.response.CommentResponse;
 import com.example.jataskflow.dto.response.TaskResponse;
 import com.example.jataskflow.model.*;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -43,19 +45,34 @@ public class TaskController {
             description = "Доступно только аутентифицированным пользователям",
             security = @SecurityRequirement(name = "JWT"),
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Задача создана"),
-                    @ApiResponse(responseCode = "401", description = "Требуется аутентификация")
+                    @ApiResponse(responseCode = "201", description = "Задача создана"),
+                    @ApiResponse(responseCode = "400", description = "Неверные данные"),
+                    @ApiResponse(responseCode = "401", description = "Требуется аутентификация"),
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
             }
     )
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Task> createTask(
-            @RequestBody @Valid TaskDto taskDto,
-            @AuthenticationPrincipal UserDetails userDetails) {
+    //@PreAuthorize("isAuthenticated()")
+    public ResponseEntity<TaskResponse> createTask(
+            @RequestBody @Valid TaskRequest request,
+            @AuthenticationPrincipal User currentUser) {
 
-        Long currentUserId = ((User) userDetails).getId();
-        taskDto.setAuthorId(currentUserId); // Устанавливаем автора
-        Task task = taskService.createTask(taskDto);
-        return ResponseEntity.ok(task);
+        // Создаем DTO для сервиса
+        TaskDto taskDto = new TaskDto();
+        taskDto.setTitle(request.getTitle());
+        taskDto.setDescription(request.getDescription());
+        taskDto.setStatus(request.getStatus() != null ? request.getStatus() : Status.WAITING);
+        taskDto.setPriority(request.getPriority() != null ? request.getPriority() : Priority.MEDIUM);
+        taskDto.setAuthorId(currentUser.getId()); // Автор - текущий пользователь
+
+        // Устанавливаем исполнителя, если указан
+        if (request.getExecutorId() != null) {
+            taskDto.setExecutorId(request.getExecutorId());
+        }
+
+        // Создаем задачу и возвращаем ответ
+        Task createdTask = taskService.createTask(taskDto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(convertToTaskResponse(createdTask));
     }
 
     @GetMapping
@@ -128,6 +145,22 @@ public class TaskController {
 
         taskService.deleteTask(taskId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{taskId}/executor")
+    @Operation(
+            summary = "Назначить исполнителя задачи",
+            description = "Доступно только автору задачи",
+            security = @SecurityRequirement(name = "JWT")
+    )
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<TaskResponse> setExecutor(
+            @PathVariable Long taskId,
+            @RequestParam Long executorId,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        TaskResponse response = taskService.setExecutor(taskId, executorId, currentUser);
+        return ResponseEntity.ok(response);
     }
 
     private TaskResponse convertToTaskResponse(Task task) {

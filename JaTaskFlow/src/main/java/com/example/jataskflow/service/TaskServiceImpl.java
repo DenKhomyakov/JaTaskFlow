@@ -40,6 +40,14 @@ public class TaskServiceImpl implements TaskService {
         task.setDescription(taskDto.getDescription());
         task.setStatus(taskDto.getStatus() != null ? taskDto.getStatus() : Status.WAITING);
         task.setPriority(taskDto.getPriority() != null ? taskDto.getPriority() : Priority.MEDIUM);
+
+        // Проверка исполнителя
+        if (taskDto.getExecutorId() != null) {
+            User executor = userRepository.findById(taskDto.getExecutorId())
+                    .orElseThrow(() -> new NotFoundException("Исполнитель не найден"));
+            task.setExecutor(executor);
+        }
+
         return taskRepository.save(task);
     }
 
@@ -153,6 +161,90 @@ public class TaskServiceImpl implements TaskService {
             throw new NotFoundException("Task not found");
         }
         taskRepository.deleteById(taskId);
+    }
+
+    @Override
+    @Transactional
+    public TaskResponse setExecutor(Long taskId, Long executorId, UserDetails currentUser) {
+        // 1. Проверяем существование задачи
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundException(taskId));
+
+        // 2. Проверяем, что у задачи есть автор
+        if (task.getAuthor() == null) {
+            throw new AccessDeniedException("Задача не имеет автора. Назначение исполнителя невозможно.");
+        }
+
+        // 3. Проверяем, что текущий пользователь — автор задачи
+        User author = (User) currentUser;
+        if (!task.getAuthor().getId().equals(author.getId())) {
+            throw new AccessDeniedException("Только автор задачи может назначить исполнителя");
+        }
+
+        // 4. Проверяем существование исполнителя
+        User executor = userRepository.findById(executorId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + executorId + " не найден"));
+
+        // 5. Проверяем, что исполнитель не является автором
+        if (executor.getId().equals(author.getId())) {
+            throw new IllegalArgumentException("Автор задачи не может быть её исполнителем");
+        }
+
+        // 6. Назначаем исполнителя и сохраняем
+        task.setExecutor(executor);
+        Task updatedTask = taskRepository.save(task);
+
+        return convertToTaskResponse(updatedTask);
+    }
+
+    private TaskResponse convertToTaskResponse(Task task) {
+        TaskResponse response = new TaskResponse();
+        response.setId(task.getId());
+        response.setTitle(task.getTitle());
+        response.setDescription(task.getDescription());
+        response.setStatus(task.getStatus());
+        response.setPriority(task.getPriority());
+
+        // Информация об авторе
+        if (task.getAuthor() != null) {
+            response.setAuthorId(task.getAuthor().getId());
+            response.setAuthorName(
+                    task.getAuthor().getFirstname() + " " +
+                            task.getAuthor().getLastname()
+            );
+        }
+
+        // Информация об исполнителе
+        if (task.getExecutor() != null) {
+            response.setExecutorId(task.getExecutor().getId());
+            response.setExecutorName(
+                    task.getExecutor().getFirstname() + " " +
+                            task.getExecutor().getLastname()
+            );
+        }
+
+        // Комментарии
+        if (task.getComments() != null) {
+            List<CommentResponse> commentResponses = task.getComments().stream()
+                    .map(comment -> {
+                        CommentResponse cr = new CommentResponse();
+                        cr.setId(comment.getId());
+                        cr.setText(comment.getText());
+                        cr.setCreatedAt(comment.getCreatedAt());
+                        if (comment.getAuthor() != null) {
+                            cr.setAuthorId(comment.getAuthor().getId());
+                            cr.setAuthorName(
+                                    comment.getAuthor().getFirstname() + " " +
+                                            comment.getAuthor().getLastname()
+                            );
+                        }
+                        return cr;
+                    })
+                    .collect(Collectors.toList());
+            response.setComments(commentResponses);
+        }
+
+        return response;
     }
 
     private CommentDto convertToCommentDto(Comment comment) {
