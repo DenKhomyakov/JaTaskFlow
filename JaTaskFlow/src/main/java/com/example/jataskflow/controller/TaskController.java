@@ -4,6 +4,7 @@ import com.example.jataskflow.dto.TaskDto;
 import com.example.jataskflow.dto.request.TaskRequest;
 import com.example.jataskflow.dto.response.CommentResponse;
 import com.example.jataskflow.dto.response.TaskResponse;
+import com.example.jataskflow.exception.GlobalExceptionHandler;
 import com.example.jataskflow.model.*;
 import com.example.jataskflow.service.TaskServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -138,6 +139,36 @@ public class TaskController {
     }
 
     @DeleteMapping("/{taskId}")
+    @Operation(
+            summary = "Удаление задачи",
+            description = "Доступно только автору задачи или администратору",
+            security = @SecurityRequirement(name = "JWT"),
+            parameters = {
+                    @Parameter(name = "taskId", description = "ID задачи для удаления", required = true, example = "1")
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "Задача успешно удалена",
+                            content = @Content(schema = @Schema(hidden = true))
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Требуется аутентификация",
+                            content = @Content(schema = @Schema(hidden = true))
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Доступ запрещён (пользователь не является автором или администратором)",
+                            content = @Content(schema = @Schema(hidden = true))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Задача не найдена",
+                            content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))
+                    )
+            }
+    )
     @PreAuthorize("hasRole('ADMIN') or @taskServiceImpl.isAuthor(#taskId, #userDetails)")
     public ResponseEntity<Void> deleteTask(
             @PathVariable Long taskId,
@@ -149,9 +180,40 @@ public class TaskController {
 
     @PutMapping("/{taskId}/executor")
     @Operation(
-            summary = "Назначить исполнителя задачи",
-            description = "Доступно только автору задачи",
-            security = @SecurityRequirement(name = "JWT")
+            summary = "Назначение исполнителя задачи",
+            description = "Доступно только автору задачи. Автор не может быть исполнителем.",
+            security = @SecurityRequirement(name = "JWT"),
+            parameters = {
+                    @Parameter(name = "taskId", description = "ID задачи", required = true, example = "1"),
+                    @Parameter(name = "executorId", description = "ID пользователя-исполнителя", required = true, example = "2")
+            },
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Исполнитель успешно назначен",
+                            content = @Content(schema = @Schema(implementation = TaskResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Некорректный запрос (например, попытка назначить автора исполнителем)",
+                            content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Требуется аутентификация",
+                            content = @Content(schema = @Schema(hidden = true))
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Доступ запрещён (пользователь не является автором задачи)",
+                            content = @Content(schema = @Schema(hidden = true))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Задача или исполнитель не найдены",
+                            content = @Content(schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))
+                    )
+            }
     )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<TaskResponse> setExecutor(
