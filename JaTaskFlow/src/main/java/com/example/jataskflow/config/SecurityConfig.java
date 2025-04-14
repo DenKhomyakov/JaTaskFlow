@@ -42,6 +42,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/tasks").hasAnyRole("ADMIN", "USER")
                         .requestMatchers("/api/**").hasAnyRole("ADMIN", "USER")
                         .requestMatchers("/swagger-ui/**").permitAll()
@@ -51,6 +52,9 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui.html/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated()
+                )
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
                 )
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtSecret, userDetailsService),
