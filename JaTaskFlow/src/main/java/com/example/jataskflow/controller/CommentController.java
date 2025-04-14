@@ -1,6 +1,7 @@
 package com.example.jataskflow.controller;
 
 import com.example.jataskflow.dto.CommentDto;
+import com.example.jataskflow.dto.request.CommentRequest;
 import com.example.jataskflow.dto.response.CommentResponse;
 import com.example.jataskflow.model.Comment;
 import com.example.jataskflow.model.User;
@@ -40,13 +41,14 @@ public class CommentController {
             security = @SecurityRequirement(name = "JWT"),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Комментарий добавлен"),
+                    @ApiResponse(responseCode = "400", description = "Невалидные данные"),
                     @ApiResponse(responseCode = "401", description = "Требуется аутентификация")
             }
     )
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Comment> addComment(@Valid @RequestBody CommentDto commentDto) {
-        Comment comment = commentService.addComment(commentDto);
-        return ResponseEntity.ok(comment);
+    public ResponseEntity<CommentResponse> addComment(@RequestBody @Valid CommentRequest request) {
+        Comment comment = commentService.addComment(request);
+        return ResponseEntity.ok(convertToCommentResponse(comment));
     }
 
     @GetMapping
@@ -95,5 +97,24 @@ public class CommentController {
         Long userId = ((User) userDetails).getId();
         commentService.deleteComment(id, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    private CommentResponse convertToCommentResponse(Comment comment) {
+        CommentResponse response = new CommentResponse();
+        response.setId(comment.getId());
+        response.setText(comment.getText());
+        response.setCreatedAt(comment.getCreatedAt());
+
+        // Добавляем только нужные данные, без циклических ссылок
+        if (comment.getAuthor() != null) {
+            response.setAuthorId(comment.getAuthor().getId());
+            response.setAuthorName(comment.getAuthor().getFirstname() + " " + comment.getAuthor().getLastname());
+        }
+
+        if (comment.getTask() != null) {
+            response.setTaskId(comment.getTask().getId());
+        }
+
+        return response;
     }
 }

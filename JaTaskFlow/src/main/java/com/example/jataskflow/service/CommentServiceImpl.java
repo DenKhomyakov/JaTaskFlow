@@ -36,15 +36,15 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment addComment(CommentDto commentDto) {
-        Task task = taskRepository.findById(commentDto.getTaskId())
+    public Comment addComment(CommentRequest request) {
+        Task task = taskRepository.findById(request.getTaskId())
                 .orElseThrow(() -> new NotFoundException("Task not found"));
 
-        User author = userRepository.findById(commentDto.getAuthorId())
+        User author = userRepository.findById(request.getAuthorId())
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         Comment comment = new Comment();
-        comment.setText(commentDto.getText());
+        comment.setText(request.getText());
         comment.setTask(task);
         comment.setAuthor(author);
         comment.setCreatedAt(LocalDateTime.now());
