@@ -51,7 +51,7 @@ public class TaskController {
                     @ApiResponse(responseCode = "403", description = "Доступ запрещен")
             }
     )
-    //@PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<TaskResponse> createTask(
             @RequestBody @Valid TaskRequest request,
             @AuthenticationPrincipal User currentUser) {
